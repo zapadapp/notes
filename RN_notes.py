@@ -77,7 +77,7 @@ if __name__ == "__main__":
         keras.layers.Dropout(0.3),
 
         # output layer
-        keras.layers.Dense(24, activation='softmax')
+        keras.layers.Dense(42, activation='softmax')
     ])
 
     # compile model

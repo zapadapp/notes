@@ -30,7 +30,7 @@ sys.path.insert(0, os.path.join(WORKSPACE, "input_parser"))
 
 
 
-FILE_PATH = "Predict\Guitar_A4_1662334237.4320405.wav"
+FILE_PATH = "Predict\Piano_D3_1662071556.2064188.wav"
 ROOT_PATH = "Predict"
 DATASET_PATH = "Data"
 JSON_PATH = "data_note.json"
@@ -42,7 +42,8 @@ SHAPE = 250
 
 CATEGORIES = ["A2","A3","A4","B2","B3","B4","C3","C4","C5","D3","D4","D5","E2","E3","E4",
               "F2","F3","F4","G2","G3","G4",
-              "C4","D4","E4"]
+              "A3","A4","A5","B3","B4","B5","C3","C4","C5","D3","D4","D5","E3","E4","E5",
+              "F3","F4","F5","G3","G4","G5",]
 
 INSTRUMENT = ["Guitar","Piano"]
 
@@ -107,7 +108,7 @@ def getNoteandInstrumentFromRNN(signal, sample_rate):
         index = np.argmax(my_prediction)
         note = CATEGORIES[index]
     
-        if index < 14 :
+        if index < 21 :
             instrument = INSTRUMENT[0]
         print("Instrument {}\n".format( instrument))
         print("Note {}\n".format( note))
