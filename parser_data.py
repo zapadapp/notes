@@ -21,7 +21,7 @@ SAMPLE_RATE = 22050
 TRACK_DURATION = 3 # measured in seconds
 SAMPLES_PER_TRACK = SAMPLE_RATE * TRACK_DURATION
 NFFT = 512
-SHAPE = 110
+SHAPE = 250
 HOP_LENGTH = 1024
 
 def isWavDir(datapath):
@@ -40,29 +40,30 @@ def generateLabel(datapath):
     
      return semantic_label
 
-def correctShape(stft_shape):
-    return stft_shape == SHAPE
+def correctShape(mel_shape):
+    return mel_shape == SHAPE
 
-def normalizeShape(stft_mat):
+def normalizeShape(mel_mat):
     nums = 0
     #init_shape tiene la dimension de columnas. 
-    init_shape= stft_mat.shape[1]
+    init_shape= mel_mat.shape[1]
     #Me fijo cuantas columnas faltan por rellenar
     nums = SHAPE - init_shape
     #itero nums copiando el anterior
-    arreglo = np.array(stft_mat[:,init_shape-1])
+    arreglo = np.array(mel_mat[:,init_shape-1])
     i = 0
+
     if nums > 0 :
         while i < nums :
-            stft_mat= np.column_stack((stft_mat,arreglo))  
+            mel_mat= np.column_stack((mel_mat,arreglo))  
             i = i +1 
     else:
-        print("MY SHAPE IS: {}".format(stft_mat.shape[1]))
-       # while i < (init_shape + nums) :
-       #     arreglo = np.array(stft_mat[:,i])
-       #     stft_mat= np.column_stack(stft_mat,arreglo)
-            #i = i +1 
-    return stft_mat
+        #print("MY SHAPE IS: {}".format(mel_mat.shape[1]))
+        mel_mat = np.array(mel_mat[:,: SHAPE])
+        #print("NOW MY SHAPE IS: {}".format(mel_mat.shape[1]))
+
+             
+    return mel_mat
 
 
 def save_information_notes(dataset_path, json_path):
@@ -70,7 +71,7 @@ def save_information_notes(dataset_path, json_path):
     data = {
         "mapping": [],
         "labels": [],
-        "STFT": []
+        "mel_spec": []
     }
     count_label = 0 
     total_files = 0
@@ -113,24 +114,25 @@ def save_information_notes(dataset_path, json_path):
                         elif j == length-1:
                             onset_signal = signal[filteredSamples[j]:]
                         
-                        short_fourier = np.abs(librosa.stft(onset_signal,n_fft = NFFT, hop_length= HOP_LENGTH)) 
-                        if not correctShape(short_fourier.shape[1]):
-                           short_fourier =  normalizeShape(short_fourier)
+                        mel_spec = librosa.feature.melspectrogram(y=onset_signal, sr=sample_rate, n_mels=30,fmax= 1000)
+                        
+                        if not correctShape(mel_spec.shape[1]) :
+                            mel_spec =  normalizeShape(mel_spec)
                             # generate x values (frequencies)
-                        if correctShape(short_fourier.shape[1])  :
-                            data["STFT"].append(short_fourier.tolist())
+                        if correctShape(mel_spec.shape[1])  :
+                            data["mel_spec"].append(mel_spec.tolist())
                             data["labels"].append(count_label)
-                            print("{}, file:{} stft_shape:{}".format(label, record,short_fourier.shape))
+                            print("{}, file:{} mel_shape:{}".format(label, record,mel_spec.shape))
                             total_files = total_files + 1
                 else:
-                        short_fourier = np.abs(librosa.stft(onset_signal,n_fft=NFFT, hop_length= HOP_LENGTH))
+                        mel_spec = librosa.feature.melspectrogram(y=signal, sr=sample_rate, n_mels=30,fmax= 1000)
 
-                        if not correctShape(short_fourier.shape[1]) :
-                            short_fourier =  normalizeShape(short_fourier)
+                        if not correctShape(mel_spec.shape[1]) :
+                            mel_spec =  normalizeShape(mel_spec)
                             # generate x values (frequencies)
-                        data["STFT"].append(short_fourier.tolist())
+                        data["mel_spec"].append(mel_spec.tolist())
                         data["labels"].append(count_label)
-                        print("{}, file:{} sftf_shape:{}".format(label, record,short_fourier.shape))
+                        print("{}, file:{} sftf_shape:{}".format(label, record,mel_spec.shape))
                         total_files = total_files + 1
             count_label = count_label + 1 
 

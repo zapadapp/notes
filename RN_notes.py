@@ -4,7 +4,6 @@ from sklearn.model_selection import train_test_split
 import tensorflow.keras as keras
 import matplotlib.pyplot as plt
 
-# path to json file that stores MFCCs and genre labels for each processed segment
 DATA_PATH = "data_note.json"
 
 def load_data(data_path):
@@ -18,7 +17,7 @@ def load_data(data_path):
         data = json.load(fp)
 
     # convert lists to numpy arrays
-    X = np.array(data["STFT"])
+    X = np.array(data["mel_spec"])
     y = np.array(data["labels"])
 
     print("Data succesfully loaded bro!")
@@ -91,11 +90,11 @@ if __name__ == "__main__":
     #print X_train Y_train
     
     # train model
-    history = model.fit(X_train, y_train, validation_data=(X_test, y_test), batch_size=32, epochs=80)
+    history = model.fit(X_train, y_train, validation_data=(X_test, y_test), batch_size=16, epochs=80)
 
     # plot accuracy and error as a function of the epochs
     plot_history(history)
 
     #save the model
-    model.save('modelo-notas-v00.h5')
+    model.save('modelo-notas-v01.h5')
     

@@ -25,44 +25,50 @@ import time
 
 FILE_PATH = os.path.dirname(os.path.realpath(__file__))
 WORKSPACE = os.path.dirname(FILE_PATH)
-MY_MODEL = keras.models.load_model('modelo-notas-v00.h5')
+MY_MODEL = keras.models.load_model('modelo-notas-v01.h5')
 sys.path.insert(0, os.path.join(WORKSPACE, "input_parser"))
 
 
 
-FILE_PATH = "Predict\Guitar_C5_1662080816.4392762.wav"
+FILE_PATH = "Predict\Guitar_A4_1662334237.4320405.wav"
 ROOT_PATH = "Predict"
 DATASET_PATH = "Data"
-JSON_PATH = "data_chord.json"
+JSON_PATH = "data_note.json"
 SAMPLE_RATE = 22050
 TRACK_DURATION = 3 # measured in seconds
 NFFT = 512
 hop_length = 1024
-SHAPE = 110
+SHAPE = 250
 
 CATEGORIES = ["A2","A3","A4","B2","B3","B4","C3","C4","C5","D3","D4","D5","E2","E3","E4",
-              "F2","F3","F4","G2","G3","G4"
+              "F2","F3","F4","G2","G3","G4",
               "C4","D4","E4"]
 
 INSTRUMENT = ["Guitar","Piano"]
 
-def correctShape(stft_shape):
-    return stft_shape == SHAPE
+def correctShape(mel_shape):
+    return mel_shape == SHAPE
 
-def normalizeShape(stft_mat):
+def normalizeShape(mel_mat):
     nums = 0
     #init_shape tiene la dimension de columnas. 
-    init_shape= stft_mat.shape[1]
+    init_shape= mel_mat.shape[1]
     #Me fijo cuantas columnas faltan por rellenar
     nums = SHAPE - init_shape
     #itero nums copiando el anterior
-    arreglo = np.array(stft_mat[:,init_shape-1])
-   
+    arreglo = np.array(mel_mat[:,init_shape-1])
     i = 0
-    while i < nums :
-        stft_mat= np.column_stack((stft_mat,arreglo))  
-        i = i +1 
-    return stft_mat
+    if nums > 0 :
+        while i < nums :
+            mel_mat= np.column_stack((mel_mat,arreglo))  
+            i = i +1 
+    else:
+        #print("MY SHAPE IS: {}".format(mel_mat.shape[1]))
+        mel_mat = np.array(mel_mat[:,: SHAPE])
+        #print("NOW MY SHAPE IS: {}".format(mel_mat.shape[1]))
+
+             
+    return mel_mat
 
 def checkBach(testing_path, note, instrument):
     test_instrument = "init"
@@ -91,13 +97,13 @@ def getNoteandInstrumentFromRNN(signal, sample_rate):
     
     instrument = INSTRUMENT[1]
     note = "not recognize "
-    short_fourier = np.abs(librosa.stft(signal,n_fft = NFFT,hop_length=hop_length)) 
-    if not correctShape(short_fourier.shape[1]) :
-        short_fourier =  normalizeShape(short_fourier)
+    mel_spec = librosa.feature.melspectrogram(y=signal, sr=sample_rate, n_mels=30,fmax=1000) 
+    if not correctShape(mel_spec.shape[1]):
+        mel_spec =  normalizeShape(mel_spec)
 
-    if correctShape(short_fourier.shape[1]):
-        stft_reshape = tf.reshape(short_fourier, [ 1,257,SHAPE ])
-        my_prediction = MY_MODEL.predict(stft_reshape)
+    if correctShape(mel_spec.shape[1]):
+        mel_reshape = tf.reshape(mel_spec, [ 1,30,SHAPE ])
+        my_prediction = MY_MODEL.predict(mel_reshape)
         index = np.argmax(my_prediction)
         note = CATEGORIES[index]
     
@@ -191,7 +197,7 @@ if __name__ == "__main__":
         case "1": 
             note = "D"
         case "2":
-            note = "E4"
+            note = "E"
         case "3":
             note = "F"
         case "4":
