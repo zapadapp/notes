@@ -21,8 +21,9 @@ SAMPLE_RATE = 22050
 TRACK_DURATION = 3 # measured in seconds
 SAMPLES_PER_TRACK = SAMPLE_RATE * TRACK_DURATION
 NFFT = 512
-SHAPE = 250
+SHAPE = 100
 HOP_LENGTH = 1024
+N_MELS_BAND = 50
 
 def isWavDir(datapath):
     list_dir = os.listdir(datapath)
@@ -114,7 +115,7 @@ def save_information_notes(dataset_path, json_path):
                         elif j == length-1:
                             onset_signal = signal[filteredSamples[j]:]
                         
-                        mel_spec = librosa.feature.melspectrogram(y=onset_signal, sr=sample_rate, n_mels=30,fmax= 1000)
+                        mel_spec = librosa.feature.melspectrogram(y=onset_signal, sr=sample_rate, n_mels=N_MELS_BAND,fmax= 1000)
                         
                         if not correctShape(mel_spec.shape[1]) :
                             mel_spec =  normalizeShape(mel_spec)
@@ -125,14 +126,14 @@ def save_information_notes(dataset_path, json_path):
                             print("{}, file:{} mel_shape:{}".format(label, record,mel_spec.shape))
                             total_files = total_files + 1
                 else:
-                        mel_spec = librosa.feature.melspectrogram(y=signal, sr=sample_rate, n_mels=30,fmax= 1000)
+                        mel_spec = librosa.feature.melspectrogram(y=signal, sr=sample_rate, n_mels=N_MELS_BAND,fmax= 1000)
 
                         if not correctShape(mel_spec.shape[1]) :
                             mel_spec =  normalizeShape(mel_spec)
                             # generate x values (frequencies)
                         data["mel_spec"].append(mel_spec.tolist())
                         data["labels"].append(count_label)
-                        print("{}, file:{} sftf_shape:{}".format(label, record,mel_spec.shape))
+                        print("{}, file:{} mel_shape:{}".format(label, record,mel_spec.shape))
                         total_files = total_files + 1
             count_label = count_label + 1 
 
