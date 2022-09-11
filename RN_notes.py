@@ -5,6 +5,7 @@ import tensorflow.keras as keras
 import matplotlib.pyplot as plt
 
 DATA_PATH = "data_note.json"
+N_MELS_BAND = 50
 
 def load_data(data_path):
     """Loads training dataset from json file.
