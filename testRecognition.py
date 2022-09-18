@@ -30,7 +30,7 @@ sys.path.insert(0, os.path.join(WORKSPACE, "input_parser"))
 
 
 
-FILE_PATH = "Predict\Piano_A5_1662152504.2298076.wav"
+FILE_PATH = "Predict\Guitar_A4_1662334237.4320405.wav"
 ROOT_PATH = "Predict"
 DATASET_PATH = "Data"
 JSON_PATH = "data_note.json"
@@ -134,7 +134,7 @@ def largeAudioWithOnset(FILE_PATH,note,instrument):
     test_note = ""
     ok_test_note = 0
     ok_test_instrument = 0
-    onset_frames = librosa.onset.onset_detect(y, sr=sr, wait=1, pre_avg=1, post_avg=1, pre_max=1, post_max=1)
+    onset_frames = librosa.onset.onset_detect(y, sr=sr, wait=10, pre_avg=10, post_avg=10, pre_max=10, post_max=10)
     samples = librosa.frames_to_samples(onset_frames)
 
     # filter lower samples

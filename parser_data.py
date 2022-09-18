@@ -96,7 +96,7 @@ def save_information_notes(dataset_path, json_path):
                 record = os.path.split(file_path)[1]
                 #onSet Detect Here
                 if duration > 3.0:
-                    onset_frames = librosa.onset.onset_detect(y=signal, sr=sample_rate, wait=1, pre_avg=1, post_avg=1, pre_max=1, post_max=1)
+                    onset_frames = librosa.onset.onset_detect(y=signal, sr=sample_rate, wait=10, pre_avg=10, post_avg=10, pre_max=10, post_max=10)
 
                     samples = librosa.frames_to_samples(onset_frames)
     			    # filter lower samples
