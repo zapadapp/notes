@@ -30,7 +30,7 @@ sys.path.insert(0, os.path.join(WORKSPACE, "input_parser"))
 
 
 
-FILE_PATH = "Predict\Guitar_A4_1662334237.4320405.wav"
+FILE_PATH = "Predict\Guitar_A_1663348525.231134.wav"
 ROOT_PATH = "Predict"
 DATASET_PATH = "Data"
 JSON_PATH = "data_note.json"
@@ -44,8 +44,9 @@ N_MELS_BANDS = 50
 CATEGORIES = ["A#2","A#3","A#4","A2","A3","A4","B2","B3","B4","C#3","C#4","C#5",
  			   "C3","C4","C5","D#3","D#4","D#5","D3","D4","D5","E2","E3","E4",
  			   "F#2","F#3","F#4","F2","F3","F4", "G#2","G#3","G#4","G2","G3","G4",
-               "A#4","A3","A4","A5","B3","B4","B5","C#4","C3","C4","C5","D#4","D3","D4","D5",
-               "E3","E4","E5","F#4","F3","F4","F5","G#4","G3","G4","G5",]
+               "A#3","A#4","A#5","A3","A4","A5","B3","B4","B5","C#3","C#4","C#5",
+               "C3","C4","C5","D#3","D#4","D#5","D3","D4","D5","E3","E4","E5",
+               "F#3","F#4","F#5","F3","F4","F5","G#3","G#4","G#5","G3","G4","G5"]
 
 INSTRUMENT = ["Guitar","Piano"]
 
