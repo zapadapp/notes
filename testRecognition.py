@@ -30,7 +30,7 @@ sys.path.insert(0, os.path.join(WORKSPACE, "input_parser"))
 
 
 
-FILE_PATH = "Predict\Guitar_A4_1662859959.4329324.wav"
+FILE_PATH = "Predict\Guitar_A_1663348525.231134.wav"
 ROOT_PATH = "Predict"
 DATASET_PATH = "Data"
 JSON_PATH = "data_note.json"
@@ -41,10 +41,12 @@ hop_length = 1024
 SHAPE = 100
 N_MELS_BANDS = 50
 
-CATEGORIES = ["A2","A3","A4","B2","B3","B4","C3","C4","C5","D3","D4","D5","E2","E3","E4",
-              "F2","F3","F4","G2","G3","G4",
-              "A3","A4","A5","B3","B4","B5","C3","C4","C5","D3","D4","D5","E3","E4","E5",
-              "F3","F4","F5","G3","G4","G5",]
+CATEGORIES = ["A#2","A#3","A#4","A2","A3","A4","B2","B3","B4","C#3","C#4","C#5",
+ 			   "C3","C4","C5","D#3","D#4","D#5","D3","D4","D5","E2","E3","E4",
+ 			   "F#2","F#3","F#4","F2","F3","F4", "G#2","G#3","G#4","G2","G3","G4",
+               "A#3","A#4","A#5","A3","A4","A5","B3","B4","B5","C#3","C#4","C#5",
+               "C3","C4","C5","D#3","D#4","D#5","D3","D4","D5","E3","E4","E5",
+               "F#3","F#4","F#5","F3","F4","F5","G#3","G#4","G#5","G3","G4","G5"]
 
 INSTRUMENT = ["Guitar","Piano"]
 
@@ -99,7 +101,7 @@ def getNoteandInstrumentFromRNN(signal, sample_rate):
     
     instrument = INSTRUMENT[1]
     note = "not recognize "
-    mel_spec = librosa.feature.melspectrogram(y=signal, sr=sample_rate, n_mels=N_MELS_BANDS,fmax=1000) 
+    mel_spec = librosa.feature.melspectrogram(y=signal, sr=sample_rate, n_mels=N_MELS_BANDS,fmin= 100,fmax=650) 
     if not correctShape(mel_spec.shape[1]):
         mel_spec =  normalizeShape(mel_spec)
 
@@ -109,7 +111,7 @@ def getNoteandInstrumentFromRNN(signal, sample_rate):
         index = np.argmax(my_prediction)
         note = CATEGORIES[index]
     
-        if index < 21 :
+        if index < 36 :
             instrument = INSTRUMENT[0]
         print("Instrument {}\n".format( instrument))
         print("Note {}\n".format( note))
@@ -133,7 +135,7 @@ def largeAudioWithOnset(FILE_PATH,note,instrument):
     test_note = ""
     ok_test_note = 0
     ok_test_instrument = 0
-    onset_frames = librosa.onset.onset_detect(y, sr=sr, wait=1, pre_avg=1, post_avg=1, pre_max=1, post_max=1)
+    onset_frames = librosa.onset.onset_detect(y, sr=sr, wait=10, pre_avg=10, post_avg=10, pre_max=10, post_max=10)
     samples = librosa.frames_to_samples(onset_frames)
 
     # filter lower samples
