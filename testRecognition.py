@@ -25,12 +25,12 @@ import time
 
 FILE_PATH = os.path.dirname(os.path.realpath(__file__))
 WORKSPACE = os.path.dirname(FILE_PATH)
-MY_MODEL = keras.models.load_model('modelo-notas-v01.h5')
+MY_MODEL = keras.models.load_model('modelo-notas-v02.h5')
 sys.path.insert(0, os.path.join(WORKSPACE, "input_parser"))
 
 
 
-FILE_PATH = "Predict\Guitar_A_1663348525.231134.wav"
+FILE_PATH = "Predict\Piano_B4_1662151426.3306227.wav"
 ROOT_PATH = "Predict"
 DATASET_PATH = "Data"
 JSON_PATH = "data_note.json"

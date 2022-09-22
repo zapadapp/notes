@@ -91,11 +91,11 @@ if __name__ == "__main__":
     #print X_train Y_train
     
     # train model
-    history = model.fit(X_train, y_train, validation_data=(X_test, y_test), batch_size=32, epochs=180)
+    history = model.fit(X_train, y_train, validation_data=(X_test, y_test), batch_size=32, epochs=80)
 
     # plot accuracy and error as a function of the epochs
     plot_history(history)
 
     #save the model
-    model.save('modelo-notas-v01.h5')
+    model.save('modelo-notas-v02.h5')
     
