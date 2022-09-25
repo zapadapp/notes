@@ -28,7 +28,7 @@ WORKSPACE = os.path.dirname(FILE_PATH)
 MY_MODEL = keras.models.load_model('modelo-notas-v02.h5')
 sys.path.insert(0, os.path.join(WORKSPACE, "input_parser"))
 
-FILE_PATH = "Predict\Guitar_C5_1662080816.4392762.wav"
+FILE_PATH = "Predict\Guitarra-nota-F4.wav"
 ROOT_PATH = "Predict"
 DATASET_PATH = "Data"
 JSON_PATH = "data_note.json"
@@ -138,12 +138,14 @@ def largeAudioWithOnset(FILE_PATH,note,instrument):
     tempo, beats = librosa.beat.beat_track(y=y, sr=sr)
     print("La cantidad de beats es: {}".format(len(beats)))
     duration = librosa.get_duration(y=y, sr= sr)
-    ONSET_PARAM = 10
+    ONSET_PARAM = 20
     velocity_audio = 60*len(beats)/duration
-    if velocity_audio > 60 and velocity_audio <= 90:
+    
+    if velocity_audio > 40 and velocity_audio <= 60 :
+        ONSET_PARAM = 10
+    elif velocity_audio > 60 :
         ONSET_PARAM = 5
-    elif velocity_audio > 90 :
-        ONSET_PARAM = 5
+
     onset_frames = librosa.onset.onset_detect(y=y, sr=sr,wait=ONSET_PARAM, pre_avg=ONSET_PARAM, post_avg=ONSET_PARAM, pre_max=ONSET_PARAM, post_max=ONSET_PARAM)
 
     samples = librosa.frames_to_samples(onset_frames)
