@@ -27,8 +27,8 @@ FILE_PATH = os.path.dirname(os.path.realpath(__file__))
 WORKSPACE = os.path.dirname(FILE_PATH)
 MY_MODEL = keras.models.load_model('modelo-notas-v02.h5')
 sys.path.insert(0, os.path.join(WORKSPACE, "input_parser"))
-
-FILE_PATH = "Predict\Guitarra-nota-F4.wav"
+import soundfile as sf
+FILE_PATH = "Predict\Piano_FC_1664125197.9481187.wav"
 ROOT_PATH = "Predict"
 DATASET_PATH = "Data"
 JSON_PATH = "data_note.json"
@@ -72,6 +72,7 @@ def normalizeShape(mel_mat):
 
              
     return mel_mat
+
 
 def checkBach(testing_path, note, instrument):
     test_instrument = "init"
@@ -125,6 +126,87 @@ def convertToNote(val) :
 
     return nota
 
+def testSong(testing_path,notes,instrument):
+    y, sr = librosa.load(testing_path)
+    ok_test = 0
+    audio_onsets = 0
+    test_instrument = ""
+    test_note = ""
+    ok_test_note = 0
+    ok_test_instrument = 0
+    ONSET_PARAM = 20
+    tempo, beats = librosa.beat.beat_track(y=y, sr=sr)
+    print("La cantidad de beats es: {}".format(len(beats)))
+    duration = librosa.get_duration(y=y, sr= sr)
+  
+    velocity_audio = 60*len(beats)/duration
+    
+    if velocity_audio > 40 and velocity_audio <= 80 :
+        ONSET_PARAM = 10
+    elif velocity_audio > 80 and velocity_audio <= 100:
+        ONSET_PARAM = 7
+    elif velocity_audio > 100:
+        ONSET_PARAM = 5
+    print("la velocidad del audio es: {}".format(velocity_audio))
+    onset_env = librosa.onset.onset_strength(y=y, sr=sr, max_size=5)
+    onset_frames = librosa.onset.onset_detect(onset_envelope=onset_env,backtrack=True, normalize =True,wait=ONSET_PARAM, pre_avg=ONSET_PARAM, post_avg=ONSET_PARAM, pre_max=ONSET_PARAM, post_max=ONSET_PARAM)
+
+    samples = librosa.frames_to_samples(onset_frames)
+
+    # filter lower samples
+    filteredSamples = filterLowSamples(samples)
+
+    # get indexes of all samples in the numpy array
+    indexes = np.where(filteredSamples>0)
+
+    length = len(indexes[0])
+    print("len samples {}".format(length))
+    print("ONSET PARAMS: {}".format(ONSET_PARAM))
+    j = 0
+    onset_times = librosa.frames_to_time(onset_frames)
+    print("Onset times: {}".format(onset_times))
+    print("Len onset times: {}".format(len(onset_times)))
+    print("Time difs:")
+
+    for i in range(len(onset_times)):
+        if i == len(onset_times)-1:
+            continue
+        print("X{} - X{} = {}".format(i+1,i,onset_times[i+1]-onset_times[i]))
+    h = 0
+    for i in indexes[0]:
+        j = i
+        if j < length-1:
+            data = y[filteredSamples[j]:filteredSamples[j+1]]    
+        elif j == length-1:
+            data = y[filteredSamples[j]:]
+        
+        test_instrument, test_note = getNoteandInstrumentFromRNN(data,sr)
+        if test_instrument == instrument : 
+            ok_test_instrument = ok_test_instrument + 1
+        if  test_note == notes[h]:
+            ok_test_note = ok_test_note + 1          
+        sf.write("{}_{}_{}_{}".format(instrument,notes[h],time.time(),".wav"),data, sr)
+        audio_onsets = audio_onsets + 1
+        h = h + 1
+    ok_test = ok_test_note
+    accuracy = ((ok_test_note  + ok_test_instrument)/2)/audio_onsets
+    
+    print("****RESUME****\n")
+    print("Note Selected: {}\n".format(note))
+    print("Instrument Selected: {}\n".format(instrument))
+    print("Total Onsets: {}\n".format(audio_onsets))
+    print("Total test notes success: {}\n".format(ok_test_note))
+    print("Total test instrument success: {}\n".format(ok_test_instrument))
+    print("%\Accuracy: {}%\n".format(ok_test*100/audio_onsets))
+    S = librosa.stft(y)
+    logS = librosa.amplitude_to_db(abs(S))
+    plt.figure(figsize=(14, 5))
+    librosa.display.waveshow(y, sr=sr)
+    plt.vlines(onset_times, -0.8, 0.79, color='r', alpha=0.8) 
+
+    plt.show()
+    return
+
 def largeAudioWithOnset(FILE_PATH,note,instrument):
       
     y, sr = librosa.load(FILE_PATH)
@@ -141,10 +223,17 @@ def largeAudioWithOnset(FILE_PATH,note,instrument):
     ONSET_PARAM = 20
     velocity_audio = 60*len(beats)/duration
     
-    if velocity_audio > 40 and velocity_audio <= 60 :
+    if velocity_audio > 40 and velocity_audio <= 80 :
         ONSET_PARAM = 10
-    elif velocity_audio > 60 :
+    elif velocity_audio > 80 and velocity_audio <= 100:
+        ONSET_PARAM = 7
+    elif velocity_audio > 100:
         ONSET_PARAM = 5
+    print("la velocidad del audio es: {}".format(velocity_audio))
+    onset_env = librosa.onset.onset_strength(y=y, sr=sr, max_size=5)
+    onset_frames = librosa.onset.onset_detect(onset_envelope=onset_env,backtrack=True, normalize =True,wait=ONSET_PARAM, pre_avg=ONSET_PARAM, post_avg=ONSET_PARAM, pre_max=ONSET_PARAM, post_max=ONSET_PARAM)
+
+    samples = librosa.frames_to_samples(onset_frames)
 
     onset_frames = librosa.onset.onset_detect(y=y, sr=sr,wait=ONSET_PARAM, pre_avg=ONSET_PARAM, post_avg=ONSET_PARAM, pre_max=ONSET_PARAM, post_max=ONSET_PARAM)
 
@@ -245,7 +334,7 @@ if __name__ == "__main__":
     scale = input("\nSelect a scale from 2 to 6: ")
     instrumentIndex = input ("\nSelect instrument\n[0] - Guitar\n[1] - Piano\n->:")
     instrument = INSTRUMENT[int(instrumentIndex)]
-    testIndex = input("\nSelect a test:\n[0] - Batch\n[1] - Only One\n[2] - Onset\n[3] - Exit:\n>:")
+    testIndex = input("\nSelect a test:\n[0] - Batch\n[1] - Only One\n[2] - Onset\n[3] - Songs \n[4] - Exit:\n>:")
     note = note + str(scale)
     match testIndex:
         case "0":
@@ -260,6 +349,11 @@ if __name__ == "__main__":
         case "2":
             largeAudioWithOnset(FILE_PATH,note,instrument)
         case "3":
+            note_song =["C4","C4","D4","C4","F4","E4","C4","C4","D4","C4","G4","F4"]
+            testSong(FILE_PATH,note_song,instrument)
+            print("See you\n")
+            quit()
+        case "4":
             print("See you\n")
             quit()
 
