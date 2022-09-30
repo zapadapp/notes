@@ -78,7 +78,7 @@ if __name__ == "__main__":
         keras.layers.Dropout(0.3),
 
         # output layer
-        keras.layers.Dense(72, activation='softmax')
+        keras.layers.Dense(80, activation='softmax')
     ])
 
     # compile model
@@ -97,5 +97,5 @@ if __name__ == "__main__":
     plot_history(history)
 
     #save the model
-    model.save('modelo-notas-v02.h5')
+    model.save('modelo-notas-FGP.h5')
     

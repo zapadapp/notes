@@ -25,10 +25,10 @@ import time
 
 FILE_PATH = os.path.dirname(os.path.realpath(__file__))
 WORKSPACE = os.path.dirname(FILE_PATH)
-MY_MODEL = keras.models.load_model('modelo-notas-v02.h5')
+MY_MODEL = keras.models.load_model('modelo-notas-FGP.h5')
 sys.path.insert(0, os.path.join(WORKSPACE, "input_parser"))
 import soundfile as sf
-FILE_PATH = "Predict\Piano_FC_1664125197.9481187.wav"
+FILE_PATH = "Predict\G2_1664069982.793921.wav"
 ROOT_PATH = "Predict"
 DATASET_PATH = "Data"
 JSON_PATH = "data_note.json"
@@ -40,14 +40,15 @@ SHAPE = 100
 N_MELS_BANDS = 50
 ONSET_PARAM = 10
 
-CATEGORIES = ["A#2","A#3","A#4","A2","A3","A4","B2","B3","B4","C#3","C#4","C#5",
- 			   "C3","C4","C5","D#3","D#4","D#5","D3","D4","D5","E2","E3","E4",
- 			   "F#2","F#3","F#4","F2","F3","F4", "G#2","G#3","G#4","G2","G3","G4",
-               "A#3","A#4","A#5","A3","A4","A5","B3","B4","B5","C#3","C#4","C#5",
-               "C3","C4","C5","D#3","D#4","D#5","D3","D4","D5","E3","E4","E5",
-               "F#3","F#4","F#5","F3","F4","F5","G#3","G#4","G#5","G3","G4","G5"]
+CATEGORIES = ["A4","B4","C4","D4","D5","E4","F4","G4",
+            "A#2","A#3","A#4","A2","A3","A4","B2","B3","B4","C#3","C#4","C#5",
+ 			"C3","C4","C5","D#3","D#4","D#5","D3","D4","D5","E2","E3","E4",
+ 			"F#2","F#3","F#4","F2","F3","F4", "G#2","G#3","G#4","G2","G3","G4",
+            "A#3","A#4","A#5","A3","A4","A5","B3","B4","B5","C#3","C#4","C#5",
+            "C3","C4","C5","D#3","D#4","D#5","D3","D4","D5","E3","E4","E5",
+            "F#3","F#4","F#5","F3","F4","F5","G#3","G#4","G#5","G3","G4","G5"]
 
-INSTRUMENT = ["Guitar","Piano"]
+INSTRUMENT = ["Flauta","Guitar","Piano"]
 
 def correctShape(mel_shape):
     return mel_shape == SHAPE
@@ -99,7 +100,7 @@ def checkBach(testing_path, note, instrument):
 
 def getNoteandInstrumentFromRNN(signal, sample_rate):
     
-    instrument = INSTRUMENT[1]
+    instrument = INSTRUMENT[2]
     note = "not recognize "
     mel_spec = librosa.feature.melspectrogram(y=signal, sr=sample_rate, n_mels=N_MELS_BANDS,fmin= 100,fmax=650) 
     if not correctShape(mel_spec.shape[1]):
@@ -111,8 +112,12 @@ def getNoteandInstrumentFromRNN(signal, sample_rate):
         index = np.argmax(my_prediction)
         note = CATEGORIES[index]
     
-        if index < 36 :
+        if index < 8 :
             instrument = INSTRUMENT[0]
+        elif index >= 8 and index < 44:
+            instrument = INSTRUMENT[1]
+
+
         print("Instrument {}\n".format( instrument))
         print("Note {}\n".format( note))
     
@@ -144,7 +149,7 @@ def testSong(testing_path,notes,instrument):
     if velocity_audio > 40 and velocity_audio <= 80 :
         ONSET_PARAM = 10
     elif velocity_audio > 80 and velocity_audio <= 100:
-        ONSET_PARAM = 7
+        ONSET_PARAM = 15
     elif velocity_audio > 100:
         ONSET_PARAM = 5
     print("la velocidad del audio es: {}".format(velocity_audio))
@@ -224,11 +229,11 @@ def largeAudioWithOnset(FILE_PATH,note,instrument):
     velocity_audio = 60*len(beats)/duration
     
     if velocity_audio > 40 and velocity_audio <= 80 :
-        ONSET_PARAM = 10
+        ONSET_PARAM = 20
     elif velocity_audio > 80 and velocity_audio <= 100:
-        ONSET_PARAM = 7
+        ONSET_PARAM = 15
     elif velocity_audio > 100:
-        ONSET_PARAM = 5
+        ONSET_PARAM = 10
     print("la velocidad del audio es: {}".format(velocity_audio))
     onset_env = librosa.onset.onset_strength(y=y, sr=sr, max_size=5)
     onset_frames = librosa.onset.onset_detect(onset_envelope=onset_env,backtrack=True, normalize =True,wait=ONSET_PARAM, pre_avg=ONSET_PARAM, post_avg=ONSET_PARAM, pre_max=ONSET_PARAM, post_max=ONSET_PARAM)
@@ -332,7 +337,7 @@ if __name__ == "__main__":
             print("Please don't be retarded")
             quit()
     scale = input("\nSelect a scale from 2 to 6: ")
-    instrumentIndex = input ("\nSelect instrument\n[0] - Guitar\n[1] - Piano\n->:")
+    instrumentIndex = input ("\nSelect instrument\n[0] Flauta\n[1] - Guitar\n[2] - Piano\n->:")
     instrument = INSTRUMENT[int(instrumentIndex)]
     testIndex = input("\nSelect a test:\n[0] - Batch\n[1] - Only One\n[2] - Onset\n[3] - Songs \n[4] - Exit:\n>:")
     note = note + str(scale)
@@ -349,7 +354,10 @@ if __name__ == "__main__":
         case "2":
             largeAudioWithOnset(FILE_PATH,note,instrument)
         case "3":
-            note_song =["C4","C4","D4","C4","F4","E4","C4","C4","D4","C4","G4","F4"]
+            note_song =["D4","B3","B3","D4","E4","A3","A3","B3","C4","G4",
+                        "G4","F#4","D4","E4","D4","C4","B3","D4","E4","E4",
+                        "E4","A4","G4","F#4","G4","E4","D4","B3","A3","B3",
+                        "D4","D4","C4","B3","A3","G3"]
             testSong(FILE_PATH,note_song,instrument)
             print("See you\n")
             quit()

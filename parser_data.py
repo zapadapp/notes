@@ -96,8 +96,23 @@ def save_information_notes(dataset_path, json_path):
                 record = os.path.split(file_path)[1]
                 #onSet Detect Here
                 if duration > 3.0:
-                    onset_frames = librosa.onset.onset_detect(y=signal, sr=sample_rate, wait=10, pre_avg=10, post_avg=10, pre_max=10, post_max=10)
-
+                    ONSET_PARAM = 20
+                    tempo, beats = librosa.beat.beat_track(y=signal, sr=sample_rate)
+                    print("La cantidad de beats es: {}".format(len(beats)))
+                    duration = librosa.get_duration(y=signal, sr= sample_rate)
+                
+                    velocity_audio = 60*len(beats)/duration
+                    
+                    if velocity_audio > 40 and velocity_audio <= 80 :
+                        ONSET_PARAM = 10
+                    elif velocity_audio > 80 and velocity_audio <= 100:
+                        ONSET_PARAM = 7
+                    elif velocity_audio > 100:
+                        ONSET_PARAM = 5
+                    print("la velocidad del audio es: {}".format(velocity_audio))
+                    onset_env = librosa.onset.onset_strength(y=signal, sr=sample_rate, max_size=10)
+                    onset_frames = librosa.onset.onset_detect(onset_envelope=onset_env,backtrack=True, normalize =True,wait=ONSET_PARAM, pre_avg=ONSET_PARAM, post_avg=ONSET_PARAM, pre_max=ONSET_PARAM, post_max=ONSET_PARAM)
+                    
                     samples = librosa.frames_to_samples(onset_frames)
     			    # filter lower samples
                     
